@@ -1,0 +1,7 @@
+## Interface: 120001, 120000
+## Title: CleanThreatPlates
+## Notes: Color adjustment enemy plates based on threat.
+## Author: sandesa
+## Version: 0.0.1
+
+CleanThreatPlates.lua
