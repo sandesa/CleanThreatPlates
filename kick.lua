@@ -14,6 +14,7 @@ local Interrupt = CP.Interrupt
 local container = CreateFrame("Frame", nil, UIParent)
 container:SetSize(220, 300)
 container:SetPoint("CENTER")
+container:Hide()
 
 container.buttons = {}
 
@@ -151,5 +152,11 @@ function Interrupt:UpdateUI()
 
     for i = index, #container.buttons do
         container.buttons[i]:Hide()
+    end
+
+    if index == 1 then
+        container:Hide()
+    else
+        container:Show()
     end
 end
