@@ -27,20 +27,24 @@ local regexList = {
 -- UTIL
 -------------------------------------------------
 
+function CP:IsAttackable(unit)
+    local reaction = UnitReaction(unit,"player")
+
+    return UnitIsEnemy("player",unit) or (reaction and reaction <= 4)
+end
+
 function CP:ValidateUnit(unit)
     if not UnitExists(unit) then return false end
 
     if not unit or not unit:match(nameplateRegex) then return false end
 
-    for _, regex in pairs(regexList) do
+    for _, regex in ipairs(regexList) do
         if unit:match(regex) then
             return false
         end
     end
 
-    local reaction = UnitReaction(unit,"player")
-
-    return UnitIsEnemy("player",unit) or reaction <= 4
+    return self:IsAttackable(unit)
 end
 
 function CP:MarkUIDirty()
@@ -115,21 +119,102 @@ f:SetScript("OnEvent", function(_, event, unit)
 end)
 
 -------------------------------------------------
--- LIGHT RENDER LOOP
+-- Blizzard Hooks
 -------------------------------------------------
 
-local render = CreateFrame("Frame")
+function CP:Hook(frame)
 
-render:SetScript("OnUpdate", function()
+    if not frame then return end
 
-    if not CP.uiDirty then return end
-    CP.uiDirty = false
+    local unit = frame.displayedUnit
 
-    if CP.Threat then
-        CP.Threat:UpdateAll()
+    if unit then 
+        if self.Threat then
+            self.Threat:UpdateUnit(unit)
+        end
+
+        if self.Interrupt then
+            self.Interrupt:UpdateUnit(unit)
+        end
     end
+end
 
-    if CP.Interrupt then
-        CP.Interrupt:UpdateUI()
+hooksecurefunc("CompactUnitFrame_UpdateHealthColor", function(frame)
+    CP:Hook(frame)
+end)
+hooksecurefunc("CompactUnitFrame_UpdateName", function(frame)
+    CP:Hook(frame)
+end)
+
+-------------------------------------------------
+-- Render Loop with throttling
+-------------------------------------------------
+
+local elapsed = 0
+local throttle = 0.10
+
+f:SetScript("OnUpdate", function()
+
+    elapsed = elapsed + delta
+
+    if elapsed >= throttle then
+        elapsed = 0
+
+         if CP.uiDirty then
+            CP.uiDirty = false
+
+            if CP.Threat then
+                CP.Threat:UpdateAll()
+            end
+
+            if CP.Interrupt then
+                CP.Interrupt:UpdateUI()
+            end
+        end
     end
 end)
+
+-------------------------------------------------
+-- Debug Command
+-------------------------------------------------
+
+SLASH_CTP1 = "/cp"
+
+SlashCmdList["CP"] = function()
+
+    if not UnitExists("target") then
+        print("|cff00ff00[CleanThreatPlates]|r No target selected.")
+        return
+    end
+
+    local name = UnitName("target") or "Unknown"
+    local guid = UnitGUID("target") or "nil"
+    local token = UnitTokenFromGUID(UnitGUID("target") or "")
+    local classification = UnitClassification("target") or "Unknown"
+    local creatureType = UnitCreatureType("target") or "Unknown"
+    local level = UnitLevel("target") or "??"
+    local threat = UnitThreatSituation("player","target")
+    local reaction = UnitReaction("target","player")
+    local inCombat = UnitAffectingCombat("target") and "Yes" or "No"
+    local targetingPlayer = UnitIsUnit("targettarget","player") and "Yes" or "No"
+    local isEnemy = UnitIsEnemy("player","target") and "Yes" or "No"
+    local isNeutral = reaction == 4 and "Yes" or "No"
+
+    local buildInfo = GetBuildInfo()
+
+    print("|cff00ff00[CleanThreatPlates Debug]|r")
+    print("Name:", name)
+    print("GUID:", guid)
+    print("Token:", token)
+    print("Classification", classification)
+    print("Creature type", creatureType)
+    print("Level", level)
+    print("ThreatSituation:", threat)
+    print("Reaction:", reaction)
+    print("In Combat:", inCombat)
+    print("Targeting You:", targetingPlayer)
+    print("Unit is Enemy:", isEnemy)
+    print("Unit is Neutral:", isNeutral)
+    print("WoW Version:", buildInfo)
+
+end

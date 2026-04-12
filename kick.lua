@@ -57,13 +57,16 @@ end
 
 function Interrupt:GetCast(unit)
 
-    local name, _, icon, startTime, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+
+    local name, displayName, textureID, startTimeMs, endTimeMs, isTradeskill, castID, notInterruptible, castingSpellID, castBarID, delayTimeMs = UnitCastingInfo(unit)
 
     if not name then
-        name, _, icon, startTime, endTime, _, notInterruptible = UnitChannelInfo(unit)
+        name, text, texture, startTimeMS, endTimeMS, isTradeSkill, notInterruptible, spellId = UnitChannelInfo(unit)
     end
+    print("Interrupt: ", name, displayName, textureID, startTimeMs, endTimeMs, isTradeskill, castID, notInterruptible, castingSpellID, castBarID, delayTimeMs)
 
     if name and not notInterruptible then
+        print("Cast detected: " .. name .. " on " .. UnitName(unit))
         return {
             spell = name,
             icon = icon,

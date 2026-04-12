@@ -34,6 +34,20 @@ function Threat:GetColor(unit)
     return colors.noThreat
 end
 
+function Threat:UpdateBarColor(plate, color)
+    local bar = plate.UnitFrame.healthBar
+    if bar then
+        bar:SetStatusBarColor(color[1], color[2], color[3])
+    end
+end
+
+function Threat:UpdateNameColor(plate, color)
+    local name = plate.UnitFrame.name
+    if name then
+        name:SetTextColor(color[1], color[2], color[3])
+    end
+end
+
 function Threat:Apply(unit)
 
     local plate = C_NamePlate.GetNamePlateForUnit(unit, true)
@@ -41,15 +55,8 @@ function Threat:Apply(unit)
 
     local color = self:GetColor(unit)
 
-    local bar = plate.UnitFrame.healthBar
-    if bar then
-        bar:SetStatusBarColor(color[1], color[2], color[3])
-    end
-
-    local name = plate.UnitFrame.name
-    if name then
-        name:SetTextColor(color[1], color[2], color[3])
-    end
+    self:UpdateBarColor(plate, color)
+    self:UpdateNameColor(plate, color)
 end
 
 -------------------------------------------------
