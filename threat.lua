@@ -59,6 +59,10 @@ function Threat:Apply(unit)
     self:UpdateNameColor(plate, color)
 end
 
+function Threat:UpdateUnit(unit)
+    self:Apply(unit)
+end
+
 -------------------------------------------------
 -- PUBLIC API
 -------------------------------------------------

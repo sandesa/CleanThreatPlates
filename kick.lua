@@ -56,17 +56,15 @@ end
 -------------------------------------------------
 
 function Interrupt:GetCast(unit)
-
-
-    local name, displayName, textureID, startTimeMs, endTimeMs, isTradeskill, castID, notInterruptible, castingSpellID, castBarID, delayTimeMs = UnitCastingInfo(unit)
+    local name, text, texture, startTime, endTime, isTradeskill, castID, notInterruptible, spellId = UnitCastingInfo(unit)
+    local icon = texture
 
     if not name then
-        name, text, texture, startTimeMS, endTimeMS, isTradeSkill, notInterruptible, spellId = UnitChannelInfo(unit)
+        name, text, texture, startTime, endTime, isTradeskill, notInterruptible, spellId = UnitChannelInfo(unit)
+        icon = texture
     end
-    print("Interrupt: ", name, displayName, textureID, startTimeMs, endTimeMs, isTradeskill, castID, notInterruptible, castingSpellID, castBarID, delayTimeMs)
 
     if name and not notInterruptible then
-        print("Cast detected: " .. name .. " on " .. UnitName(unit))
         return {
             spell = name,
             icon = icon,
@@ -82,6 +80,12 @@ function Interrupt:OnCastEvent(unit)
     if not data then return end
 
     data.cast = self:GetCast(unit)
+end
+
+function Interrupt:UpdateUnit(unit)
+    if CP.activeUnits[unit] and CP.activeUnits[unit].cast then
+        self:UpdateUI()
+    end
 end
 
 -------------------------------------------------

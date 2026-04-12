@@ -153,7 +153,7 @@ end)
 local elapsed = 0
 local throttle = 0.10
 
-f:SetScript("OnUpdate", function()
+f:SetScript("OnUpdate", function(_, delta)
 
     elapsed = elapsed + delta
 
@@ -166,10 +166,10 @@ f:SetScript("OnUpdate", function()
             if CP.Threat then
                 CP.Threat:UpdateAll()
             end
+        end
 
-            if CP.Interrupt then
-                CP.Interrupt:UpdateUI()
-            end
+        if CP.Interrupt then
+            CP.Interrupt:UpdateUI()
         end
     end
 end)
