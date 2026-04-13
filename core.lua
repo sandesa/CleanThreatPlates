@@ -38,7 +38,7 @@ function CP:ValidateUnit(unit)
 
     if not unit or not unit:match(nameplateRegex) then return false end
 
-    for _, regex in ipairs(regexList) do
+    for _, regex in pairs(regexList) do
         if unit:match(regex) then
             return false
         end
@@ -112,7 +112,7 @@ f:SetScript("OnEvent", function(_, event, unit)
 
     elseif event:find("UNIT_SPELLCAST") then
         if CP.Interrupt and unit and CP.activeUnits[unit] then
-            CP.Interrupt:OnCastEvent(unit)
+            CP.Interrupt:OnCastEvent(event, unit)
             CP:MarkUIDirty()
         end
     end
@@ -133,9 +133,9 @@ function CP:Hook(frame)
             self.Threat:UpdateUnit(unit)
         end
 
-        if self.Interrupt then
-            self.Interrupt:UpdateUnit(unit)
-        end
+        -- if self.Interrupt then
+        --     self.Interrupt:UpdateUnit(unit)
+        -- end
     end
 end
 
@@ -151,11 +151,15 @@ end)
 -------------------------------------------------
 
 local elapsed = 0
-local throttle = 0.10
+local throttle = 0.1
 
 f:SetScript("OnUpdate", function(_, delta)
 
     elapsed = elapsed + delta
+
+    if CP.Interrupt then
+            CP.Interrupt:UpdateUI()
+    end
 
     if elapsed >= throttle then
         elapsed = 0
@@ -166,10 +170,6 @@ f:SetScript("OnUpdate", function(_, delta)
             if CP.Threat then
                 CP.Threat:UpdateAll()
             end
-        end
-
-        if CP.Interrupt then
-            CP.Interrupt:UpdateUI()
         end
     end
 end)

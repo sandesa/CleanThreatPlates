@@ -50,7 +50,10 @@ end
 
 function Threat:Apply(unit)
 
+    if not CP:ValidateUnit(unit) then return end
+
     local plate = C_NamePlate.GetNamePlateForUnit(unit, true)
+
     if not plate or plate:IsForbidden() then return end
 
     local color = self:GetColor(unit)
